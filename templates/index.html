@@ -1,0 +1,83 @@
+{% include "header.html" %}
+
+<!-- Page Header-->
+<header
+  class="masthead"
+  style="background-image: url('../static/assets/img/home-bg.jpg')"
+>
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="site-heading">
+          <h1>Stable Diffusion Prompts</h1>
+          <span class="subheading fw-bold">Gender related differences in AI generated prompts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<div class="container px-4 px-lg-5 mb-5">
+  <div class="row gx-4 gx-lg-5 justify-content-center">
+    <div class="col-md-10 col-lg-8 col-xl-12">
+
+      <form id="imageForm" method="POST" action="{{ url_for('submit_form') }}">
+
+            {% for image in images %}
+            <div class="image-step" id="step{{ loop.index }}" style="display: {% if loop.first %}block{% else %}none{% endif %};">
+              <div class="row">
+                <!-- Column for the Image -->
+                <div class="col-md-6">
+                  <div class="post-preview">
+                    <img src="{{ image }}" class="img-fluid"/>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <p class="mt-0">Please replicate given image with your own words <span class="fw-bold">(Be detailed as much as possible)</span></p>
+                  <textarea name="answer{{ loop.index }}" class="form-control" rows="4" required="required"></textarea>
+                  <input type="hidden" name="reaction_time{{ loop.index }}" id="reaction_time{{ loop.index }}">
+                  <input type="hidden" name="image_urls{{ loop.index }}" id="image_urls{{ loop.index }}" value="{{ image }}">
+
+
+                  <div class="d-flex justify-content-end mt-3">
+                    {% if not loop.last %}
+                    <button type="button" class="btn btn-primary next-btn" onclick="nextStep({{ loop.index }})">Next</button>
+                    {% else %}
+                    <button type="submit" class="btn btn-success">Submit</button>
+                    {% endif %}
+                  </div>
+                  {% if current_user.id == 1%}
+                    <div class="add-images">
+                      <a href="{{ url_for('add_new_post') }}" class="btn btn-primary ">Add Images</a>
+                    </div>
+                  {% endif %}
+                </div>
+
+              </div>
+            </div>
+        {% endfor %}
+      </form>
+    </div>
+  </div>
+</div>
+
+{% include "footer.html" %}
+
+<script>
+  let startTime = Date.now();
+
+  function nextStep(currentStep) {
+    // Record reaction time
+    const endTime = Date.now();
+    const reactionTime = (endTime - startTime) / 1000; // Convert to seconds
+    document.getElementById('reaction_time' + currentStep).value = reactionTime;
+
+    // Show the next step
+    document.getElementById('step' + currentStep).style.display = 'none';
+    document.getElementById('step' + (currentStep + 1)).style.display = 'block';
+
+    // Reset start time for next step
+    startTime = Date.now();
+  }
+</script>
